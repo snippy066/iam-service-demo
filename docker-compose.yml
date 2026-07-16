@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: iam-postgres
+    environment:
+      POSTGRES_DB: iam
+      POSTGRES_USER: iam
+      POSTGRES_PASSWORD: iam
+    ports:
+      - "5432:5432"
+    volumes:
+      - iam-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iam -d iam"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  iam-service:
+    build: .
+    container_name: iam-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Activate the docker profile plus demo data seeding
+      SPRING_PROFILES_ACTIVE: docker,seed
+      DB_URL: jdbc:postgresql://postgres:5432/iam
+      DB_USERNAME: iam
+      DB_PASSWORD: iam
+      # CHANGE THIS. Demo value only — set a strong 32+ byte secret in real use.
+      JWT_SECRET: change-me-to-a-long-random-secret-at-least-32-bytes
+      SEED_ADMIN_EMAIL: admin@example.com
+      SEED_ADMIN_PASSWORD: ChangeMe123!
+    ports:
+      - "8080:8080"
+
+  # Optional lightweight DB UI — start with: docker compose --profile tools up
+  adminer:
+    image: adminer:latest
+    container_name: iam-adminer
+    profiles: ["tools"]
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8080"
+
+volumes:
+  iam-pgdata:

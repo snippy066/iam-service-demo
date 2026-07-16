@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://postgres:5432/iam}
+    username: ${DB_USERNAME:iam}
+    password: ${DB_PASSWORD:iam}
+
+app:
+  seed:
+    enabled: ${SEED_ENABLED:true}
+    tenant-id: ${SEED_TENANT:primary}
+    admin-email: ${SEED_ADMIN_EMAIL:admin@example.com}
+    admin-password: ${SEED_ADMIN_PASSWORD:ChangeMe123!}
+
+logging:
+  level:
+    com.portfolio.iam: info
